@@ -19,6 +19,13 @@ Python 3.8+
 
 Windows OS (required for pycaw audio control)
 
+Cross-Platform Compatibility for Hand Gesture Volume Control
+🖥️ OS Compatibility Overview
+Component	Windows	macOS	Linux	Notes
+Core Functionality (Hand Tracking)	✅ Yes	✅ Yes	✅ Yes	OpenCV & MediaPipe work on all platforms
+Volume Control	✅ Yes	❌ No	❌ No	pycaw only works on Windows
+Camera Access	✅ Yes	✅ Yes	✅ Yes	Requires webcam permissions
+
 Webcam
 
 Installation
