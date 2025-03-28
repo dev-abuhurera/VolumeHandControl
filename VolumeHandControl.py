@@ -7,78 +7,108 @@ from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 
-# Camera setup
-wCam, hCam = 1280, 720
-cap = cv2.VideoCapture(0)
-cap.set(3, wCam)
-cap.set(4, hCam)
 
-# Hand detector
-detector = htm.HandDetector(detection_con=0.7)
+class VolumeController:
+    def __init__(self, width=1280, height=720, detection_con=0.7):
+        """Initialize volume controller with camera and hand detector"""
+        # Camera setup
+        self.width = width
+        self.height = height
+        self.cap = cv2.VideoCapture(0)
+        self.cap.set(3, width)
+        self.cap.set(4, height)
 
-# Volume control setup
-devices = AudioUtilities.GetSpeakers()
-interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-volume = cast(interface, POINTER(IAudioEndpointVolume))
-volRange = volume.GetVolumeRange()
-minVol = volRange[0]
-maxVol = volRange[1]
-vol = 0
-volBar = 400
-volPer = 0
+        # Hand detector
+        self.detector = htm.HandDetector(detection_con=detection_con)
 
-# FPS variables
-ptime = 0
+        # Volume control
+        self.setup_volume_control()
 
-while True:
-    success, img = cap.read()
-    if not success:
-        break
+        # Tracking variables
+        self.ptime = 0
+        self.volBar = 400
+        self.volPer = 0
 
-    img = detector.find_hands(img)
-    lmlist = detector.find_position(img, draw=False)
+    def setup_volume_control(self):
+        """Initialize system volume control"""
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        self.volume = cast(interface, POINTER(IAudioEndpointVolume))
+        self.volRange = self.volume.GetVolumeRange()
+        self.minVol = self.volRange[0]
+        self.maxVol = self.volRange[1]
 
-    if len(lmlist) != 0:
-        # Get thumb (4) and index finger (8) positions
-        x1, y1 = lmlist[4][1], lmlist[4][2]
-        x2, y2 = lmlist[8][1], lmlist[8][2]
-        cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
+    def calculate_distance(self, x1, y1, x2, y2):
+        """Calculate distance between two points"""
+        return math.hypot(x2 - x1, y2 - y1)
 
-        # Draw circles and line between fingers
+    def map_volume(self, distance):
+        """Map finger distance to volume range"""
+        vol = np.interp(distance, [50, 300], [self.minVol, self.maxVol])
+        self.volBar = np.interp(distance, [50, 300], [400, 150])
+        self.volPer = np.interp(distance, [50, 300], [0, 100])
+        return vol
+
+    def draw_interface(self, img, x1, y1, x2, y2, cx, cy, fps):
+        """Draw all UI elements on the image"""
+        # Draw fingers and connection
         cv2.circle(img, (x1, y1), 15, (20, 100, 255), cv2.FILLED)
         cv2.circle(img, (x2, y2), 15, (20, 100, 255), cv2.FILLED)
         cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
 
-        # Calculate distance between fingers
-        length = math.hypot(x2 - x1, y2 - y1)
+        # Draw volume bar
+        cv2.rectangle(img, (50, 150), (85, 400), (0, 255, 0), 3)
+        cv2.rectangle(img, (50, int(self.volBar)), (85, 400), (0, 255, 0), cv2.FILLED)
+        cv2.putText(img, f'{int(self.volPer)} %', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 3)
 
-        # Hand range 50 - 300 (you may need to adjust these)
-        # Volume range -65 - 0 (typical for most systems)
-        vol = np.interp(length, [50, 300], [minVol, maxVol])
-        volBar = np.interp(length, [50, 300], [400, 150])
-        volPer = np.interp(length, [50, 300], [0, 100])
+        # Draw FPS
+        cv2.putText(img, f"FPS: {int(fps)}", (40, 70), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 3)
 
-        # Set system volume
-        volume.SetMasterVolumeLevel(vol, None)
+        return img
 
-        if length < 50:
-            cv2.circle(img, (cx, cy), 15, (20, 100, 200), cv2.FILLED)
+    def run(self):
+        """Main loop to run the volume controller"""
+        while True:
+            success, img = self.cap.read()
+            if not success:
+                break
 
-    # Draw volume bar
-    cv2.rectangle(img, (50, 150), (85, 400), (0, 255, 0), 3)
-    cv2.rectangle(img, (50, int(volBar)), (85, 400), (0, 255, 0), cv2.FILLED)
-    cv2.putText(img, f'{int(volPer)} %', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 3)
+            img = self.detector.find_hands(img)
+            lmlist = self.detector.find_position(img, draw=False)
 
-    # Calculate and display FPS
-    ctime = time.time()
-    fps = 1 / (ctime - ptime)
-    ptime = ctime
-    cv2.putText(img, f"FPS: {int(fps)}", (40, 70), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 3)
+            x1 = y1 = x2 = y2 = cx = cy = 0 # initialize the local variables
 
-    cv2.imshow("Volume Control", img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+            if len(lmlist) != 0:
+                x1, y1 = lmlist[4][1], lmlist[4][2]  # Thumb
+                x2, y2 = lmlist[8][1], lmlist[8][2]  # Index finger
+                cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
 
-cap.release()
-cv2.destroyAllWindows()
+                length = self.calculate_distance(x1, y1, x2, y2)
+                vol = self.map_volume(length)
+                self.volume.SetMasterVolumeLevel(vol, None)
 
+                if length < 50:
+                    cv2.circle(img, (cx, cy), 15, (20, 100, 200), cv2.FILLED)
+
+            # Calculate FPS
+            ctime = time.time()
+            fps = 1 / (ctime - self.ptime)
+            self.ptime = ctime
+
+            img = self.draw_interface(img, x1, y1, x2, y2, cx, cy, fps)
+
+            cv2.imshow("Volume Control", img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        self.cap.release()
+        cv2.destroyAllWindows()
+
+
+def main():
+    controller = VolumeController()
+    controller.run()
+
+
+if __name__ == "__main__":
+    main()
