@@ -57,12 +57,12 @@ class VolumeController:
         cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
 
         # Draw volume bar
-        cv2.rectangle(img, (50, 150), (85, 400), (0, 255, 0), 3)
-        cv2.rectangle(img, (50, int(self.volBar)), (85, 400), (0, 255, 0), cv2.FILLED)
+        cv2.rectangle(img, (50, 150), (85, 400), (0, 0, 0), 3)
+        cv2.rectangle(img, (50, int(self.volBar)), (85, 400), (255, 255, 255), cv2.FILLED)
         cv2.putText(img, f'{int(self.volPer)} %', (40, 450), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 3)
 
         # Draw FPS
-        cv2.putText(img, f"FPS: {int(fps)}", (40, 70), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 3)
+        cv2.putText(img, f"FPS: {int(fps)}", (40, 70), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 3)
 
         return img
 
