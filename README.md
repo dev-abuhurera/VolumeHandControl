@@ -24,8 +24,8 @@ A Python application that uses **OpenCV** and **MediaPipe** to control your syst
 
 ### Installation  
 1. Clone the repo:  
-   ```bash
-   git clone https://github.com/Abuhurera-coder/VolumeHandControl.git
+
+   git clone https://github.com/dev-abuhurera/VolumeHandControl.git
    cd VolumeHandControl
 Install dependencies:
 
