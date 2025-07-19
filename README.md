@@ -1,6 +1,5 @@
 # Hand Gesture Volume Control ✋🔊  
 
-![Demo GIF](demo.gif) *(Replace with your actual demo image/ GIF)*  
 
 ## 📌 Project Overview  
 A Python application that uses **OpenCV** and **MediaPipe** to control your system volume by detecting hand gestures (thumb and index finger distance).  
@@ -30,38 +29,41 @@ A Python application that uses **OpenCV** and **MediaPipe** to control your syst
    cd VolumeHandControl
 Install dependencies:
 
-bash
+
 pip install -r requirements.txt
+
+
 Run:
-
-bash
 python volume_hand_control.py
-👆 Usage
-Increase volume: Spread thumb & index finger
 
-Decrease volume: Bring fingers closer
 
-Mute: Touch fingers together
+## 👆 Usage  
+- **Increase volume**: Spread thumb & index finger apart → 📈  
+- **Decrease volume**: Bring fingers closer together → 📉  
+- **Mute**: Touch thumb and index finger → 🔇  
 
-(Add screenshot of hand gestures here)
+*(Add `demo_gestures.png` or GIF showing these actions)*  
 
-⚙ Customization
-Setting	How to Change
-Sensitivity	Modify [50, 300] in np.interp()
-Colors	Edit cv2 RGB values
-Camera resolution	Adjust wCam, hCam
-🌐 Compatibility
-OS	Hand Tracking	Volume Control	Notes
-Windows	✅ Yes	✅ Yes	Full functionality
-macOS	✅ Yes	❌ No	No pycaw support
-Linux	✅ Yes	❌ No	Requires alternative audio control
-⚠ Troubleshooting
-Issue	Fix
-No volume control	Use Windows (or implement alsaaudio for Linux)
-Hand not detected	Improve lighting/background
-High CPU usage	Lower camera resolution in code
-📂 Files
-text
+---
+
+## ⚙ Customization  
+
+| Setting               | Modification Guide                     |
+|-----------------------|----------------------------------------|
+| **Sensitivity**       | Edit `[50, 300]` range in `np.interp()`|
+| **Colors**           | Change RGB values in `cv2` functions   |
+| **Camera Resolution**| Adjust `wCam` and `hCam` variables     |
+
+---
+
+## 🌐 Compatibility  
+
+| OS        | Hand Tracking | Volume Control | Notes                          |
+|-----------|--------------|----------------|--------------------------------|
+| **Windows** | ✅ Yes       | ✅ Yes          | Full functionality with `pycaw`|
+| **macOS**  | ✅ Yes       | ❌ No           | Requires alternative audio control |
+| **Linux**  | ✅ Yes       | ❌ No           | Use `alsaaudio` (Linux-only)   |
+
 .
 ├── volume_hand_control.py  # Main script
 ├── HandTrackingModule.py   # MediaPipe wrapper
