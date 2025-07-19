@@ -64,7 +64,10 @@ python volume_hand_control.py
 | **macOS**  | ✅ Yes       | ❌ No           | Requires alternative audio control |
 | **Linux**  | ✅ Yes       | ❌ No           | Use `alsaaudio` (Linux-only)   |
 
+markdown
+## 📂 Project Structure
 .
-├── volume_hand_control.py  # Main script
-├── HandTrackingModule.py   # MediaPipe wrapper
-└── requirements.txt       # Dependencies
+├── volume_hand_control.py # Main application script
+├── HandTrackingModule.py # Hand detection module (MediaPipe wrapper)
+├── requirements.txt # Python dependencies
+└── README.md # Documentation
