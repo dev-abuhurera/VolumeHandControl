@@ -41,8 +41,7 @@ python volume_hand_control.py
 - **Increase volume**: Spread thumb & index finger apart → 📈  
 - **Decrease volume**: Bring fingers closer together → 📉  
 - **Mute**: Touch thumb and index finger → 🔇  
-
-*(Add `demo_gestures.png` or GIF showing these actions)*  
+  
 
 ---
 
@@ -64,10 +63,4 @@ python volume_hand_control.py
 | **macOS**  | ✅ Yes       | ❌ No           | Requires alternative audio control |
 | **Linux**  | ✅ Yes       | ❌ No           | Use `alsaaudio` (Linux-only)   |
 
-markdown
-## 📂 Project Structure
-.
-├── volume_hand_control.py # Main application script
-├── HandTrackingModule.py # Hand detection module (MediaPipe wrapper)
-├── requirements.txt # Python dependencies
-└── README.md # Documentation
+
